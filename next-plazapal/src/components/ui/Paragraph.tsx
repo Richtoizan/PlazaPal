@@ -1,7 +1,7 @@
 import { FC, HTMLAttributes, forwardRef } from "react";
 import { VariantProps, cva } from "class-variance-authority";
 import { divide, size } from "lodash";
-import { cn } from "@/app/lib/utils";
+import { cn } from "@/lib/utils";
 
 const paragraphVariants = cva(
   "max-W-prose text-slate-700 dark:text-slate-300 mb-2 text-center",

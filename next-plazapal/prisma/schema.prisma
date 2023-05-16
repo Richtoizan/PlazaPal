@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -8,4 +5,131 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+}
+
+model Admin {
+  ID          BigInt  @id @default(autoincrement())
+  Email       String  @db.VarChar(50)
+  Name        String  @db.VarChar(50)
+  Surname     String  @db.VarChar(50)
+  TelephoneNo String  @db.VarChar(20)
+  isMallOwner Boolean
+  Branch      Branch?
+}
+
+model Branch {
+  ID         BigInt      @id @default(autoincrement())
+  Location   String      @db.VarChar(50)
+  DateOpened DateTime    @db.Date
+  ManagedBy  BigInt      @unique
+  Admin      Admin       @relation(fields: [ManagedBy], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ManagedBy_fkey")
+  MallStaff  MallStaff[]
+  Space      Space[]
+}
+
+model ShopOwner {
+  ID          BigInt     @id @default(autoincrement())
+  Email       String     @db.VarChar(50)
+  Name        String     @db.VarChar(50)
+  Surname     String     @db.VarChar(50)
+  TelephoneNo String     @db.VarChar(20)
+  Contract    Contract[]
+  Shop        Shop[]
+}
+
+model Shop {
+  ID            BigInt          @id @default(autoincrement())
+  Sector        String          @db.VarChar(50)
+  Name          String          @db.VarChar(50)
+  OwnedBy       BigInt
+  OccupiedSpace OccupiedSpace[]
+  ShopOwner     ShopOwner       @relation(fields: [OwnedBy], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "OwnedBy_fkey")
+  ShopStaff     ShopStaff[]
+}
+
+model Space {
+  ID              BigInt         @id @default(autoincrement())
+  Location        String         @db.VarChar(50)
+  Floor           String         @db.VarChar(20)
+  BranchID        BigInt
+  AreaSquareMeter Float
+  Contract        Contract[]
+  OccupiedSpace   OccupiedSpace?
+  Branch          Branch         @relation(fields: [BranchID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "BranchID_fkey")
+}
+
+model OccupiedSpace {
+  SpaceID    BigInt      @id
+  DateOpened DateTime    @db.Date
+  OpenTime   DateTime    @db.Time(6)
+  CloseTime  DateTime    @db.Time(6)
+  ShopID     BigInt
+  Shop       Shop        @relation(fields: [ShopID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ShopID_fkey")
+  Space      Space       @relation(fields: [SpaceID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "SpaceID_fkey")
+  Sensor     Sensor[]
+  ShopStaff  ShopStaff[]
+}
+
+model Contract {
+  ID               BigInt            @id @default(autoincrement())
+  StartDate        DateTime          @db.Date
+  EndDate          DateTime          @db.Date
+  Fee              BigInt
+  PaymentFrequency String            @db.VarChar(20)
+  SpaceID          BigInt
+  OwnerID          BigInt
+  ShopOwner        ShopOwner         @relation(fields: [OwnerID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "OwnerID_fkey")
+  Space            Space             @relation(fields: [SpaceID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "SpaceID_fkey")
+  ContractPayment  ContractPayment[]
+}
+
+model ContractPayment {
+  ContractID   BigInt
+  PaymentID    BigInt
+  AmountPaid   BigInt?
+  Timestamp    DateTime? @db.Timestamp(6)
+  ExpectedDate DateTime  @db.Date
+  Contract     Contract  @relation(fields: [ContractID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ContractID_fkey")
+
+  @@id([ContractID, PaymentID])
+}
+
+model MallStaff {
+  ID          BigInt   @id @default(autoincrement())
+  Email       String   @db.VarChar(50)
+  Name        String   @db.VarChar(50)
+  Surname     String   @db.VarChar(50)
+  TelephoneNo String   @db.VarChar(20)
+  StartDate   DateTime @db.Date
+  Salary      BigInt
+  AssignedTo  BigInt
+  Branch      Branch   @relation(fields: [AssignedTo], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "AssignedTo_fkey")
+}
+
+model ShopStaff {
+  ID            BigInt        @id @default(autoincrement())
+  Email         String        @db.VarChar(50)
+  Name          String        @db.VarChar(50)
+  Surname       String        @db.VarChar(50)
+  TelephoneNo   String        @db.VarChar(20)
+  WorksAt       BigInt
+  EmployedFor   BigInt
+  Shop          Shop          @relation(fields: [EmployedFor], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "EmployedFor_fkey")
+  OccupiedSpace OccupiedSpace @relation(fields: [WorksAt], references: [SpaceID], onDelete: NoAction, onUpdate: NoAction, map: "WorksAt_fkey")
+}
+
+model Sensor {
+  ID            BigInt        @id @default(autoincrement())
+  SpaceID       BigInt
+  OccupiedSpace OccupiedSpace @relation(fields: [SpaceID], references: [SpaceID], onDelete: NoAction, onUpdate: NoAction, map: "SpaceID_fkey")
+  SensorData    SensorData[]
+}
+
+model SensorData {
+  SensorID       BigInt
+  Timestamp      DateTime @db.Timestamp(6)
+  DetectionCount BigInt
+  Sensor         Sensor   @relation(fields: [SensorID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "SensorID_fkey")
+
+  @@id([SensorID, Timestamp])
 }

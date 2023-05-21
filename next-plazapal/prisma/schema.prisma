@@ -9,11 +9,12 @@ datasource db {
 
 model Admin {
   ID          BigInt  @id @default(autoincrement())
-  Email       String  @db.VarChar(50)
+  Email       String  @unique @db.VarChar(50)
   Name        String  @db.VarChar(50)
   Surname     String  @db.VarChar(50)
   TelephoneNo String  @db.VarChar(20)
   isMallOwner Boolean
+  Password    String
   Branch      Branch?
 }
 

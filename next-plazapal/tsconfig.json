@@ -33,6 +33,6 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "src/app/pages/index.js"
-  ],
+, "src/lib/checkDb.js"  ],
   "exclude": ["node_modules"]
 }

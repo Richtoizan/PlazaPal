@@ -6,34 +6,39 @@ import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 
-export const authOptions: NextAuthOptions = {
-  pages: {
-    signIn: "/login",
-  },
+export default NextAuth({
   providers: [
     CredentialsProvider({
       name: "Credentials",
       credentials: {
-        username: { label: "Username", type: "text" },
-        password: { label: "Password", type: "password" },
+        Email: { label: "Email", type: "text" },
+        Password: { label: "Password", type: "password" },
       },
+
       async authorize(credentials, req) {
         if (
           !credentials ||
-          typeof credentials.username !== "string" ||
-          typeof credentials.password !== "string"
+          typeof credentials.Email !== "string" ||
+          typeof credentials.Password !== "string"
         ) {
           return null;
         }
 
         // Use Prisma to find the admin by their email
         const admin = await prisma.admin.findUnique({
-          where: { email: credentials.username },
+          where: { Email: credentials.Email },
         });
 
+        console.log(admin);
+
         // If the admin exists and their password is correct, return the admin
-        if (admin && bcrypt.compareSync(credentials.password, admin.password)) {
-          return { id: admin.id, name: admin.name, email: admin.email };
+        if (admin && bcrypt.compareSync(credentials.Password, admin.Password)) {
+          // The passwords match, return the admin
+          return {
+            id: admin.ID.toString(),
+            name: admin.Name,
+            email: admin.Email,
+          };
         } else {
           return null;
         }
@@ -54,25 +59,29 @@ export const authOptions: NextAuthOptions = {
       return session;
     },
     async jwt({ token, user }) {
+      if (!token.email) {
+        throw new Error("Email is undefined in the JWT token");
+      }
+
       const dbAdmin = await prisma.admin.findFirst({
         where: {
-          email: token.email,
+          Email: token.email,
         },
       });
 
       if (!dbAdmin) {
-        token.id = user!.id;
+        token.ID = user!.id;
         return token;
       }
 
       return {
-        id: dbAdmin.id,
-        name: dbAdmin.name,
-        email: dbAdmin.email,
+        id: dbAdmin.ID.toString(),
+        name: dbAdmin.Name,
+        email: dbAdmin.Email,
       };
     },
     redirect() {
       return "/dashboard";
     },
   },
-};
+});

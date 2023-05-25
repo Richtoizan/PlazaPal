@@ -3,10 +3,11 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcrypt";
+import { db } from "@/lib/db";
 
 const prisma = new PrismaClient();
 
-export default NextAuth({
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -58,30 +59,37 @@ export default NextAuth({
       }
       return session;
     },
-    async jwt({ token, user }) {
-      if (!token.email) {
-        throw new Error("Email is undefined in the JWT token");
+    async jwt({ token, user, account, profile, isNewUser }) {
+      secret: process.env.NEXTAUTH_SECRET;
+
+      // Initial sign in
+      if (account && user) {
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+        };
       }
 
-      const dbAdmin = await prisma.admin.findFirst({
-        where: {
-          Email: token.email,
-        },
-      });
+      // Subsequent JWT refresh
+      if (token && token.email) {
+        const dbUser = await db.admin.findFirst({
+          where: { Email: token.email },
+        });
 
-      if (!dbAdmin) {
-        token.ID = user!.id;
-        return token;
+        if (dbUser) {
+          (token.id = dbUser.ID.toString()),
+            (token.name = dbUser.Name),
+            (token.email = dbUser.Email);
+        }
       }
 
-      return {
-        id: dbAdmin.ID.toString(),
-        name: dbAdmin.Name,
-        email: dbAdmin.Email,
-      };
+      return token;
     },
     redirect() {
       return "/dashboard";
     },
   },
-});
+};
+
+export default NextAuth(authOptions);

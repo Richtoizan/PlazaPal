@@ -27,7 +27,7 @@ export default function Home() {
             Enjoy complete control over your branches, shops, employees and more
             with your{" "}
             <Link
-              href="/login"
+              href="/api/auth/signin"
               className="underline underline-offset-2 text-black dark:text-light-gold"
             >
               account

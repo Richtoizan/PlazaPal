@@ -86,9 +86,9 @@ export const authOptions: NextAuthOptions = {
 
       return token;
     },
-    redirect() {
-      return "/dashboard";
-    },
+    // redirect() {
+    //   return "/dashboard";
+    // },
   },
 };
 

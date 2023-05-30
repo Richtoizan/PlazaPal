@@ -7,6 +7,7 @@ import { notFound } from "next/navigation";
 import LargeHeading from "@/components/ui/LargeHeading";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
+import Paragraph from "@/components/ui/Paragraph";
 
 export const metadata: Metadata = {
   title: "PlazaPal | Dashboard",
@@ -27,16 +28,12 @@ const page = async () => {
           >
             Welcome, {user.user.name}
           </LargeHeading>
-          <div className="relative w-full max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>
-        </div>
-        <div className="relative h-screen flex items-center justify-center overflow-x-hidden">
-          <Link
-            className={buttonVariants({ variant: "ghost" })}
-            href="/shop"
-          >
+          <Link className={buttonVariants({ variant: "ghost" })} href="/shop">
             Shop
           </Link>
+          <div className="relative w-full max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>
         </div>
+        <div className="relative h-screen flex items-center justify-center overflow-x-hidden"></div>
       </div>
     </div>
   );

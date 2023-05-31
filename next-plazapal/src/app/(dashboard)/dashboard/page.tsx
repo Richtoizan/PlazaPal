@@ -26,10 +26,10 @@ const page = async () => {
             size="lg"
             className="three-d text-black dark:text-light-gold max-w-2xl"
           >
-            Welcome, {user.user.name}
+            Welcome, {user.user.name}, what would you like to manage today?
           </LargeHeading>
-          <Link className={buttonVariants({ variant: "ghost" })} href="/shop">
-            Shop
+          <Link className={buttonVariants({ variant: "outline" })} href="/shop">
+            Shops
           </Link>
           <div className="relative w-full max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>
         </div>

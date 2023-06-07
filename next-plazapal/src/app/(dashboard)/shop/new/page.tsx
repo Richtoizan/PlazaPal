@@ -16,13 +16,6 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent } from "react";
 
-function replacer(key: any, value: any) {
-  if (typeof value === "bigint") {
-    // Convert all BigInt values to strings
-    return value.toString();
-  }
-  return value;
-}
 
 export default function Page() {
   const [saveShop, setSaveShop] = useState({

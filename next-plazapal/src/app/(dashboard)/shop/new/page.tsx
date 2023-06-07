@@ -12,9 +12,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent } from "react";
+import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
 
 
 export default function Page() {
@@ -25,6 +26,31 @@ export default function Page() {
   });
 
   const router = useRouter();
+
+  const [owners, setOwners] = useState([{
+    id: "",
+    name: "",
+    surname: "",
+  }]);
+
+  useEffect(() => {
+    const fetchOwners = async () => {
+      const endpoint = "/api/shopOwner";
+      const options = {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      const response = await fetch(endpoint, options);
+      const result = await response.json();
+
+      setOwners(result);
+    }
+
+    fetchOwners();
+  }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
@@ -52,6 +78,11 @@ export default function Page() {
   };
 
   const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setSaveShop({ ...saveShop, [name]: value });
+  };
+
+  const handleSaveChangeSelect = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
     setSaveShop({ ...saveShop, [name]: value });
   };
@@ -92,13 +123,20 @@ export default function Page() {
                   </div>
                   <div className="flex flex-col space-y-1.5">
                     <Label htmlFor="ownedBy">Owner</Label>
-                    <Input
+                    <Select
                       name="ownedBy"
-                      id="ownedBy"
+                      labelId="ownedBy-select-label"
+                      id="ownedBy-select"
                       value={saveShop.ownedBy}
-                      onChange={handleSaveChange}
-                      placeholder="ID of the owner"
-                    />
+                      label="Owner"
+                      onChange={handleSaveChangeSelect}
+                    >
+                      {owners.map(owner => (
+                        <MenuItem key={owner.id} value={owner.id}>
+                          {owner.name} {owner.surname}
+                        </MenuItem>
+                      ))}
+                    </Select>
                   </div>
                   <Button type="submit">Submit</Button>
                 </div>

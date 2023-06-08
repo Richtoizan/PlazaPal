@@ -13,7 +13,15 @@ const ShopPage = async ({ params }: { params: { shop: string } }) => {
   });
 
   if (!shop) return notFound();
-  else
+  else {
+    const owner = await db.shopOwner.findUnique({
+      where: {
+        ID: shop.OwnedBy,
+      }
+    })
+
+    const ownedBy = owner ? (owner.Name + " " + owner.Surname) : shop.OwnedBy;
+
     return (
       <div className="relative h-screen flex items-center justify-center overflow-x-hidden">
         <div className="container pt-32 max-w-7xl mx-auto w-full h-full">
@@ -24,7 +32,7 @@ const ShopPage = async ({ params }: { params: { shop: string } }) => {
             >
               <p>{shop.Name}</p>
               <p>Sector: {shop.Sector}</p>
-              <p>Owned By: {shop.OwnedBy.toString()}</p>
+              <p>Owned By: {ownedBy.toString()}</p>
             </LargeHeading>
             <div className="relative w-full max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>
           </div>
@@ -32,6 +40,7 @@ const ShopPage = async ({ params }: { params: { shop: string } }) => {
         </div>
       </div>
     );
+  }
 };
 
 export default ShopPage;

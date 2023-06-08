@@ -12,6 +12,7 @@ interface TableProps {
   columnLinks: {
     index: number,
     link: string,
+    textField: string,
   }[],
 }
 
@@ -25,12 +26,12 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
   })
 
   // Update the renderCell callback for the columns that have links
-  columnLinks.forEach(({ index, link }) => {
+  columnLinks.forEach(({ index, link, textField }) => {
     columns[index].renderCell = (params) => {
       // Example link: /shop/1
       return (<Link
         href={`/${link}/${params.value}`}>
-        {params.value}
+        {params.row[textField]}
       </Link>)
     }
   })

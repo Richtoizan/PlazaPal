@@ -27,30 +27,36 @@ const columnLinks = [
   {
     index: 0,
     link: "shop",
+    textField: "id",
   },
   {
     index: 3,
-    link: "shopowner",
+    link: "shopOwner",
+    textField: "ownerName"
   },
 ];
-
-const displayShopOwner = (o: ShopOwner | null) => {
-  if (!o) return "undefined";
-
-  return o.Name + " " + o.Surname;
-};
 
 const page = async () => {
   const user = await getServerSession(authOptions);
   if (!user) return notFound();
 
-  const tuples = await db.shop.findMany();
+  const tuples = await db.shop.findMany({
+    include: {
+      ShopOwner: {
+        select: {
+          Name: true,
+          Surname: true,
+        }
+      }
+    },
+  });
 
   const rows = tuples.map((t) => ({
     id: Number(t.ID),
     name: t.Name,
     sector: t.Sector,
     ownedby: Number(t.OwnedBy),
+    ownerName: t.ShopOwner.Name + " " + t.ShopOwner.Surname,
   }));
 
   return (
@@ -74,18 +80,3 @@ const page = async () => {
   );
 };
 export default page;
-
-// TODO: reuse the following code to get a reference to the shop owner of each shop
-
-// const rows = await Promise.all(tuples.map(async (t) => ({
-//   id: (Number)(t.ID),
-//   name: t.Name,
-//   sector: t.Sector,
-
-//   // Find the shop owner of this shop
-//   ownedby: await db.shopOwner.findUnique({
-//     where: {
-//       ID: t.OwnedBy
-//     }
-//   }),
-// })));

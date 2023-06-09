@@ -86,6 +86,27 @@ export default async function handle(req: any, res: any) {
       res.json(JSON.parse(resultString));
     }
   }
+  else if (req.method === 'DELETE') {
+    const { id } = req.query;
+    if (id) {
+      try {
+        const result = await db.shop.delete({
+          where: {
+            ID: Number(id),
+          }
+        });
+  
+        const resultString = JSON.stringify(result, replacer);
+        res.json(JSON.parse(resultString));
+      }
+      catch (error) {
+        // If we could not delete because of some constraints, we should be able to report that
+        res.status(405).json(error)
+      }
+    } else {
+      res.status(405).json({ message: 'Delete without ID Not Allowed' });
+    }
+  }
   else {
     res.status(405).json({ message: 'Method Not Allowed' });
   }

@@ -6,6 +6,7 @@ import { useTheme } from 'next-themes'
 import { FC } from 'react'
 import { buttonVariants } from "@/components/ui/Button";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface TableProps {
   rows: any,
@@ -26,6 +27,8 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
     },
   })
 
+  const router = useRouter();
+
   // Update the renderCell callback for the columns that have links
   columnLinks.forEach(({ index, link, textField }) => {
     columns[index].renderCell = (params) => {
@@ -37,6 +40,25 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
     }
   })
 
+  const handleDelete = async (link, id) => {
+    try {
+      const response = await fetch(`/api/${link}/?id=${id}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        // Deleted successfully
+        // Refresh page
+        router.push(`/${link}`);
+      } else {
+        // TODO: notify the admin about failure due to constraints
+        console.error('Failed to delete item');
+      }
+    } catch (error) {
+      console.error('Error deleting item:', error);
+    }
+  };
+
   // Add edit button column
   columns.push({ field: "edit", headerName: "", width: 200 });
   columns[columns.length - 1].renderCell = (params) => {
@@ -45,6 +67,17 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
       href={`/${columnLinks[0].link}/edit/${params.row.id}`}>
       Edit
     </Link>)
+  }
+
+  // Add delete button column
+  columns.push({ field: "delete", headerName: "", width: 200 });
+  columns[columns.length - 1].renderCell = (params) => {
+    return (<button
+      className={buttonVariants({ variant: "outline" })}
+      onClick={() => handleDelete(columnLinks[0].link, params.row.id)}
+      >
+      Delete
+    </button>)
   }
 
   return (

@@ -4,6 +4,7 @@ import { createTheme, ThemeProvider } from '@mui/material'
 import { DataGrid, GridColDef } from '@mui/x-data-grid'
 import { useTheme } from 'next-themes'
 import { FC } from 'react'
+import { buttonVariants } from "@/components/ui/Button";
 import Link from "next/link";
 
 interface TableProps {
@@ -35,6 +36,16 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
       </Link>)
     }
   })
+
+  // Add edit button column
+  columns.push({ field: "edit", headerName: "", width: 200 });
+  columns[columns.length - 1].renderCell = (params) => {
+    return (<Link
+      className={buttonVariants({ variant: "outline" })}
+      href={`/${columnLinks[0].link}/edit/${params.row.id}`}>
+      Edit
+    </Link>)
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>

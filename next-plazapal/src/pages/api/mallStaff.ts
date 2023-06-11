@@ -28,8 +28,8 @@ export default async function handle(req: any, res: any) {
           email: mallStaff.Email,
           telephoneNo: mallStaff.TelephoneNo,
           startDate: mallStaff.StartDate,
-          salary: mallStaff.Salary,
-          assignedTo: mallStaff.AssignedTo,
+          salary: Number(mallStaff.Salary),
+          assignedTo: Number(mallStaff.AssignedTo),
         });
       } else {
         res.status(404).json({ message: "Not found" });
@@ -40,14 +40,14 @@ export default async function handle(req: any, res: any) {
 
       res.status(200).json(
         mallStaffs.map((mallStaff) => ({
-          id: mallStaff.ID,
+          id: Number(mallStaff.ID),
           name: mallStaff.Name,
           surname: mallStaff.Surname,
           email: mallStaff.Email,
           telephoneNo: mallStaff.TelephoneNo,
           startDate: mallStaff.StartDate,
-          salary: mallStaff.Salary,
-          assignedTo: mallStaff.AssignedTo,
+          salary: Number(mallStaff.Salary),
+          assignedTo: Number(mallStaff.AssignedTo),
         }))
       );
     }

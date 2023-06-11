@@ -35,7 +35,7 @@ export default async function handle(req: any, res: any) {
 
       res.status(200).json(
         shopOwners.map((shopOwner) => ({
-          id: shopOwner.ID,
+          id: Number(shopOwner.ID),
           name: shopOwner.Name,
           surname: shopOwner.Surname,
           email: shopOwner.Email,

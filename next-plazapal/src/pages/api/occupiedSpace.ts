@@ -37,7 +37,7 @@ export default async function handle(req: any, res: any) {
 
       res.status(200).json(
         occupiedSpaces.map((occupiedSpace) => ({
-          spaceId: occupiedSpace.SpaceID,
+          spaceId: Number(occupiedSpace.SpaceID),
           dateOpened: occupiedSpace.DateOpened,
           openTime: occupiedSpace.OpenTime,
           closeTime: occupiedSpace.CloseTime,

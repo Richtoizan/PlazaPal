@@ -37,7 +37,7 @@ export default async function handle(req: any, res: any) {
 
       res.status(200).json(
         spaces.map((space) => ({
-          id: space.ID,
+          id: Number(space.ID),
           location: space.Location,
           floor: space.Floor,
           branchId: Number(space.BranchID),

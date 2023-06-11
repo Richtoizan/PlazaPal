@@ -34,8 +34,8 @@ export default async function handle(req: any, res: any) {
           surname: shopStaff.Surname,
           email: shopStaff.Email,
           telephoneNo: shopStaff.TelephoneNo,
-          worksAt: shopStaff.WorksAt,
-          employedFor: shopStaff.EmployedFor,
+          worksAt: Number(shopStaff.WorksAt),
+          employedFor: Number(shopStaff.EmployedFor),
           shopName: shopStaff.Shop.Name,
         });
       } else {
@@ -55,13 +55,13 @@ export default async function handle(req: any, res: any) {
 
       res.status(200).json(
         shopStaffs.map((shopStaff) => ({
-          id: shopStaff.ID,
+          id: Number(shopStaff.ID),
           name: shopStaff.Name,
           surname: shopStaff.Surname,
           email: shopStaff.Email,
           telephoneNo: shopStaff.TelephoneNo,
-          worksAt: shopStaff.WorksAt,
-          employedFor: shopStaff.EmployedFor,
+          worksAt: Number(shopStaff.WorksAt),
+          employedFor: Number(shopStaff.EmployedFor),
           shopName: shopStaff.Shop.Name,
         }))
       );

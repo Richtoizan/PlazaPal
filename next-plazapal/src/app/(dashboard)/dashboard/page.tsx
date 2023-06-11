@@ -43,6 +43,12 @@ const page = async () => {
             </Link>
             <Link
               className={buttonVariants({ variant: "outline" })}
+              href="/contract"
+            >
+              Contracts
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
               href="/branch"
             >
               Branches

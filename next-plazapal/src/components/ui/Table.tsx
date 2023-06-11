@@ -58,31 +58,35 @@ const Table: FC<TableProps> = ({ rows, columns, columnLinks }) => {
     }
   };
 
-  // Add edit button column
-  columns.push({ field: "edit", headerName: "", width: 100 });
-  columns[columns.length - 1].renderCell = (params) => {
-    return (
-      <Link
-        className={buttonVariants({ variant: "outline" })}
-        href={`/${columnLinks[0].link}/edit/${params.row.id}`}
-      >
-        Edit
-      </Link>
-    );
-  };
+  if (!columns.find((value) => {value.field == "edit"})) {
+    // Add edit button column
+    columns.push({ field: "edit", headerName: "", width: 100 });
+    columns[columns.length - 1].renderCell = (params) => {
+      return (
+        <Link
+          className={buttonVariants({ variant: "outline" })}
+          href={`/${columnLinks[0].link}/edit/${params.row.id}`}
+        >
+          Edit
+        </Link>
+      );
+    };
+  }
 
-  // Add delete button column
-  columns.push({ field: "delete", headerName: "", width: 100 });
-  columns[columns.length - 1].renderCell = (params) => {
-    return (
-      <button
-        className={buttonVariants({ variant: "outline" })}
-        onClick={() => handleDelete(columnLinks[0].link, params.row.id)}
-      >
-        Delete
-      </button>
-    );
-  };
+  if (!columns.find((value) => {value.field == "delete"})) {
+    // Add delete button column
+    columns.push({ field: "delete", headerName: "", width: 100 });
+    columns[columns.length - 1].renderCell = (params) => {
+      return (
+        <button
+          className={buttonVariants({ variant: "outline" })}
+          onClick={() => handleDelete(columnLinks[0].link, params.row.id)}
+        >
+          Delete
+        </button>
+      );
+    };
+  }
 
   return (
     <ThemeProvider theme={darkTheme}>

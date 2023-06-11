@@ -1,0 +1,5 @@
+-- DropForeignKey
+ALTER TABLE "OccupiedSpace" DROP CONSTRAINT "ShopID_fkey";
+
+-- AddForeignKey
+ALTER TABLE "OccupiedSpace" ADD CONSTRAINT "ShopID_fkey" FOREIGN KEY ("ShopID") REFERENCES "Shop"("ID") ON DELETE CASCADE ON UPDATE NO ACTION;

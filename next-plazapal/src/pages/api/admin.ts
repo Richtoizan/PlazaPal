@@ -1,81 +1,83 @@
 import { db } from "@/lib/db";
+import { log } from "console";
 
 function replacer(key: any, value: any) {
   if (typeof value === "bigint") {
-    // Convert all BigInt values to strings
     return value.toString();
   }
   return value;
 }
 
-// /api/shop
-// Required fields in body: sector, name, ownedBy
+// /api/admin
+// Required fields in body: id, name, surname, email, telephoneNo, isMallOwner, password
 export default async function handle(req: any, res: any) {
   if (req.method === "GET") {
     const { id } = req.query;
 
     if (id) {
-      // Handle GET request for a specific shop by ID
-      const shop = await db.shop.findUnique({
-        where: {
-          ID: Number(id),
-        },
-        include: {
-          ShopOwner: {
-            select: {
-              Name: true,
-              Surname: true,
-            },
-          },
-        },
+      // Handle GET request for a specific admin by ID
+      const admin = await db.admin.findUnique({
+        where: { ID: Number(id) },
       });
 
-      if (shop) {
+      if (admin) {
         res.status(200).json({
-          name: shop.Name,
-          sector: shop.Sector,
-          ownedBy: Number(shop.OwnedBy),
-          ownerName: shop.ShopOwner.Name + " " + shop.ShopOwner.Surname,
+          name: admin.Name,
+          surname: admin.Surname,
+          email: admin.Email,
+          telephoneNo: admin.TelephoneNo,
+          isMallOwner: admin.isMallOwner,
+          password: admin.Password,
         });
       } else {
-        res.status(404).json({ message: "User not found" });
+        res.status(404).json({ message: "Admin not found" });
       }
     } else {
-      // Handle GET request for all shops
-      const shops = await db.shop.findMany();
+      // Handle GET request for all admins
+      const admins = await db.admin.findMany();
 
       res.status(200).json(
-        shops.map((shop) => ({
-          name: shop.Name,
-          sector: shop.Sector,
-          ownedBy: Number(shop.OwnedBy),
+        admins.map((admin) => ({
+          name: admin.Name,
+          surname: admin.Surname,
+          email: admin.Email,
+          telephoneNo: admin.TelephoneNo,
+          isMallOwner: admin.isMallOwner,
+          password: admin.Password,
         }))
       );
     }
   } else if (req.method === "POST") {
-    const { sector, name, ownedBy } = req.body;
+    const { name, surname, email, telephoneNo, isMallOwner, password } =
+      req.body;
     const { id } = req.query;
 
     if (id) {
-      const result = await db.shop.update({
+      const result = await db.admin.update({
         where: {
           ID: Number(id),
         },
         data: {
-          Sector: sector,
           Name: name,
-          OwnedBy: ownedBy,
+          Surname: surname,
+          Email: email,
+          TelephoneNo: telephoneNo,
+          isMallOwner: isMallOwner,
+          Password: password,
         },
       });
 
       const resultString = JSON.stringify(result, replacer);
       res.json(JSON.parse(resultString));
     } else {
-      const result = await db.shop.create({
+      const result = await db.admin.create({
         data: {
-          Sector: sector,
           Name: name,
-          OwnedBy: ownedBy,
+          Surname: surname,
+          Email: email,
+          TelephoneNo: telephoneNo,
+          isMallOwner: isMallOwner,
+          Password: password,
         },
       });
 
@@ -88,7 +90,7 @@ export default async function handle(req: any, res: any) {
     const { id } = req.query;
     if (id) {
       try {
-        const result = await db.shop.delete({
+        const result = await db.admin.delete({
           where: {
             ID: Number(id),
           },

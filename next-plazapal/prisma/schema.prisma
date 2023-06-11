@@ -65,7 +65,7 @@ model OccupiedSpace {
   OpenTime   DateTime    @db.Time(6)
   CloseTime  DateTime    @db.Time(6)
   ShopID     BigInt
-  Shop       Shop        @relation(fields: [ShopID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "ShopID_fkey")
+  Shop       Shop        @relation(fields: [ShopID], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "ShopID_fkey")
   Space      Space       @relation(fields: [SpaceID], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "SpaceID_fkey")
   Sensor     Sensor[]
   ShopStaff  ShopStaff[]
@@ -115,7 +115,7 @@ model ShopStaff {
   TelephoneNo   String        @db.VarChar(20)
   WorksAt       BigInt
   EmployedFor   BigInt
-  Shop          Shop          @relation(fields: [EmployedFor], references: [ID], onDelete: NoAction, onUpdate: NoAction, map: "EmployedFor_fkey")
+  Shop          Shop          @relation(fields: [EmployedFor], references: [ID], onDelete: Cascade, onUpdate: NoAction, map: "EmployedFor_fkey")
   OccupiedSpace OccupiedSpace @relation(fields: [WorksAt], references: [SpaceID], onDelete: NoAction, onUpdate: NoAction, map: "WorksAt_fkey")
 }
 

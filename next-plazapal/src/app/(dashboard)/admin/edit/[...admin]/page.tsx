@@ -13,7 +13,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { ChangeEvent } from "react";
 import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Link from "next/link";
@@ -35,25 +35,24 @@ export default function Page() {
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
 
-  const [saveShop, setSaveShop] = useState({
+  const [saveAdmin, setSaveAdmin] = useState({
     name: "",
-    sector: "",
-    ownedBy: "",
+    surname: "",
+    email: "",
+    telephoneNo: "",
+    isMallOwner: false,
+    password: "",
   });
 
   const router = useRouter();
 
-  const [owners, setOwners] = useState([
-    {
-      id: "",
-      name: "",
-      surname: "",
-    },
-  ]);
+  const pathname = usePathname();
+  const pathNames = pathname ? pathname.split("/") : [];
+  const adminId = pathname ? pathNames[pathNames.length - 1] : null;
 
   useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
+    const fetchAdmin = async () => {
+      const endpoint = "/api/admin?id=" + adminId;
       const options = {
         method: "GET",
         headers: {
@@ -64,20 +63,22 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setOwners(result);
+      setSaveAdmin(result);
     };
 
-    fetchOwners();
+    fetchAdmin();
   }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    const dataToSend = {
+      ...saveAdmin,
+    };
 
     console.log("Data to send:", dataToSend);
 
-    const endpoint = "/api/shop";
+    const endpoint = "/api/admin?id=" + adminId;
     const options = {
       method: "POST",
       headers: {
@@ -89,20 +90,17 @@ export default function Page() {
     const response = await fetch(endpoint, options);
     const result = await response.json();
 
-    if (result) {
-    }
-
-    router.push("/shop");
+    router.push("/admin/" + adminId);
   };
 
   const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveAdmin({ ...saveAdmin, [name]: value });
   };
 
   const handleSaveChangeSelect = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveAdmin({ ...saveAdmin, [name]: Boolean(value) });
   };
 
   return (
@@ -114,11 +112,11 @@ export default function Page() {
               size="lg"
               className="text-black dark:text-white max-w-2xl py-10"
             >
-              Add Shop
+              Edit Admin
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Enter the details of the new shop</CardTitle>
+                <CardTitle>Edit the details of the admin</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
@@ -128,31 +126,48 @@ export default function Page() {
                       <Input
                         name="name"
                         id="name"
-                        value={saveShop.name}
+                        value={saveAdmin.name}
                         onChange={handleSaveChange}
-                        placeholder="Name of the shop"
+                        // placeholder="Admin name"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
+                      <Label htmlFor="surname">Surname</Label>
                       <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
+                        name="surname"
+                        id="surname"
+                        value={saveAdmin.surname}
                         onChange={handleSaveChange}
-                        placeholder="Sector of the shop"
+                        // placeholder="Admin surname"
                       />
                     </div>
-                    <div className="flex flex-col space-y-1.5 dark:text-white">
-                      <Label htmlFor="ownedBy" id="ownedBy-select-label">
-                        Owner
-                      </Label>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        name="email"
+                        id="email"
+                        value={saveAdmin.email}
+                        onChange={handleSaveChange}
+                        // placeholder="Admin email"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="telephoneNo">Telephone Number</Label>
+                      <Input
+                        name="telephoneNo"
+                        id="telephoneNo"
+                        value={saveAdmin.telephoneNo}
+                        onChange={handleSaveChange}
+                        // placeholder="Admin telephone number"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="isMallOwner">Is Mall Owner</Label>
                       <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
+                        name="isMallOwner"
+                        id="isMallOwner-select"
+                        value={saveAdmin.isMallOwner ? "true" : "false"}
+                        label="Is Mall Owner"
                         onChange={handleSaveChangeSelect}
                         className="border-gray-800 dark:text-white"
                         sx={{
@@ -166,12 +181,20 @@ export default function Page() {
                           },
                         }}
                       >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
-                          </MenuItem>
-                        ))}
+                        <MenuItem value="true">Yes</MenuItem>
+                        <MenuItem value="false">No</MenuItem>
                       </Select>
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="telephoneNo">Password</Label>
+                      <Input
+                        name="password"
+                        id="password"
+                        value={saveAdmin.password}
+                        type="password"
+                        onChange={handleSaveChange}
+                        // placeholder="Admin password"
+                      />
                     </div>
                     <Button type="submit">Submit</Button>
                   </div>
@@ -180,9 +203,9 @@ export default function Page() {
             </Card>
             <Link
               className={buttonVariants({ variant: "outline" })}
-              href="/shop"
+              href="/admin"
             >
-              Back to shops
+              Back to admins
             </Link>
           </div>
         </div>

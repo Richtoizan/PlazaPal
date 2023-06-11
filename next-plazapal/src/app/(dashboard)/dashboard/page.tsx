@@ -19,21 +19,38 @@ const page = async () => {
   if (!user) return notFound();
 
   return (
-    <div className="relative h-screen flex items-center justify-center overflow-x-hidden">
-      <div className="container pt-32 max-w-7xl mx-auto w-full h-full">
-        <div className="h-full gap-6 flex flex-col justify-start lg:justify-center items-center lg:items-start">
+    <div className="relative min-h-screen flex items-center justify-center overflow-x-hidden">
+      <div className="container pt-24 max-w-7xl mx-auto w-full">
+        <div className="gap-6 flex flex-col justify-start lg:justify-center items-center lg:items-start">
           <LargeHeading
             size="lg"
             className="three-d text-black dark:text-light-gold max-w-2xl"
           >
             Welcome, {user.user.name}, what would you like to manage today?
           </LargeHeading>
-          <Link className={buttonVariants({ variant: "outline" })} href="/shop">
-            Shops
-          </Link>
+          <div>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/shop"
+            >
+              Shops
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/branch"
+            >
+              Branches
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/admin"
+            >
+              Admins
+            </Link>
+          </div>
+
           <div className="relative w-full max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>
         </div>
-        <div className="relative h-screen flex items-center justify-center overflow-x-hidden"></div>
       </div>
     </div>
   );

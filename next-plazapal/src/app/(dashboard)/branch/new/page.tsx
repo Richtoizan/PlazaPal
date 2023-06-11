@@ -20,6 +20,15 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
 import { useTheme } from "next-themes";
 import LargeHeading from "@/components/ui/LargeHeading";
+import { format } from "date-fns";
+import { Calendar as CalendarIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
 const useMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -32,18 +41,27 @@ const useMounted = () => {
 };
 
 export default function Page() {
+  const [date, setDate] = useState<Date>(new Date());
+
+  useEffect(() => {
+    setSaveBranch((prevState) => ({
+      ...prevState,
+      dateOpened: format(date, "yyyy-MM-dd"),
+    }));
+  }, [date]);
+
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
 
-  const [saveShop, setSaveShop] = useState({
-    name: "",
-    sector: "",
-    ownedBy: "",
+  const [saveBranch, setSaveBranch] = useState({
+    location: "",
+    dateOpened: "",
+    managedBy: "",
   });
 
   const router = useRouter();
 
-  const [owners, setOwners] = useState([
+  const [managers, setManagers] = useState([
     {
       id: "",
       name: "",
@@ -52,8 +70,8 @@ export default function Page() {
   ]);
 
   useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
+    const fetchManagers = async () => {
+      const endpoint = "/api/admin";
       const options = {
         method: "GET",
         headers: {
@@ -64,20 +82,25 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setOwners(result);
+      setManagers(result);
     };
 
-    fetchOwners();
+    fetchManagers();
   }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    // updating dateOpened field with date object
+    const dataToSend = {
+      ...saveBranch,
+      dateOpened: date,
+      ownedBy: Number(saveBranch.managedBy),
+    };
 
     console.log("Data to send:", dataToSend);
 
-    const endpoint = "/api/shop";
+    const endpoint = "/api/branch";
     const options = {
       method: "POST",
       headers: {
@@ -92,17 +115,17 @@ export default function Page() {
     if (result) {
     }
 
-    router.push("/shop");
+    router.push("/branch");
   };
 
   const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveBranch({ ...saveBranch, [name]: value });
   };
 
   const handleSaveChangeSelect = (event: SelectChangeEvent) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveBranch({ ...saveBranch, [name]: value });
   };
 
   return (
@@ -114,45 +137,66 @@ export default function Page() {
               size="lg"
               className="text-black dark:text-white max-w-2xl py-10"
             >
-              Add Shop
+              Add Branch
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Enter the details of the new shop</CardTitle>
+                <CardTitle>Enter the details of the new branch</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
                   <div className="grid w-full items-center gap-4">
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="location">Location</Label>
                       <Input
-                        name="name"
-                        id="name"
-                        value={saveShop.name}
+                        name="location"
+                        id="location"
+                        value={saveBranch.location}
                         onChange={handleSaveChange}
-                        placeholder="Name of the shop"
+                        placeholder="Location of the branch"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
-                      <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
-                        onChange={handleSaveChange}
-                        placeholder="Sector of the shop"
-                      />
+                      <Label htmlFor="dateOpened">Date Opened</Label>
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-[280px] justify-start text-left font-normal",
+                              !date && "text-muted-foreground"
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {date ? (
+                              format(date, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0">
+                          <Calendar
+                            mode="single"
+                            selected={date}
+                            onSelect={(selectedDate: Date | undefined) =>
+                              selectedDate && setDate(selectedDate)
+                            }
+                            initialFocus
+                          />
+                        </PopoverContent>
+                      </Popover>
                     </div>
                     <div className="flex flex-col space-y-1.5 dark:text-white">
-                      <Label htmlFor="ownedBy" id="ownedBy-select-label">
-                        Owner
+                      <Label htmlFor="managedBy" id="managedBy-select-label">
+                        Manager
                       </Label>
                       <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
+                        name="managedBy"
+                        labelId="managedBy-select-label"
+                        id="managedBy-select"
+                        value={saveBranch.managedBy}
+                        label="Manager"
                         onChange={handleSaveChangeSelect}
                         className="border-gray-800 dark:text-white"
                         sx={{
@@ -166,9 +210,9 @@ export default function Page() {
                           },
                         }}
                       >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
+                        {managers.map((manager) => (
+                          <MenuItem key={manager.id} value={manager.id}>
+                            {manager.name} {manager.surname}
                           </MenuItem>
                         ))}
                       </Select>
@@ -180,9 +224,9 @@ export default function Page() {
             </Card>
             <Link
               className={buttonVariants({ variant: "outline" })}
-              href="/shop"
+              href="/branch"
             >
-              Back to shops
+              Back to branches
             </Link>
           </div>
         </div>

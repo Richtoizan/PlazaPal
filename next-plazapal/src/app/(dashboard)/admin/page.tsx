@@ -1,7 +1,7 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { db } from "@/lib/db";
-import { ShopOwner } from "@prisma/client";
+import { Admin } from "@prisma/client";
 import { buttonVariants } from "@/components/ui/Button";
 
 import type { Metadata } from "next";
@@ -17,22 +17,17 @@ export const metadata: Metadata = {
 };
 
 const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 130 },
-  { field: "name", headerName: "Name", width: 300 },
-  { field: "sector", headerName: "Sector", width: 300 },
-  { field: "ownedby", headerName: "Owned By", width: 300 },
+  { field: "id", headerName: "ID", width: 150 },
+  { field: "name", headerName: "Name", width: 250 },
+  { field: "surname", headerName: "Surname", width: 250 },
+  { field: "email", headerName: "Email", width: 375 },
 ];
 
 const columnLinks = [
   {
     index: 0,
-    link: "shop",
+    link: "admin",
     textField: "id",
-  },
-  {
-    index: 3,
-    link: "shopOwner",
-    textField: "ownerName",
   },
 ];
 
@@ -40,35 +35,25 @@ const page = async () => {
   const user = await getServerSession(authOptions);
   if (!user) return notFound();
 
-  const tuples = await db.shop.findMany({
-    include: {
-      ShopOwner: {
-        select: {
-          Name: true,
-          Surname: true,
-        },
-      },
-    },
-  });
+  const tuples = await db.admin.findMany();
 
   const rows = tuples.map((t) => ({
     id: Number(t.ID),
     name: t.Name,
-    sector: t.Sector,
-    ownedby: Number(t.OwnedBy),
-    ownerName: t.ShopOwner.Name + " " + t.ShopOwner.Surname,
+    surname: t.Surname,
+    email: t.Email,
   }));
 
   return (
     <div className="relative h-screen flex items-center justify-center overflow-x-hidden">
       <div className="container pt-32 max-w-7xl mx-auto w-full h-full ">
         <Paragraph className="text-center md:text-left mt-4 -mb-4 space-x-10">
-          Shop Table{"    "}
+          Admin Table{"    "}
           <Link
             className={buttonVariants({ variant: "outline" })}
-            href="/shop/new"
+            href="/admin/new"
           >
-            + Add Shop
+            + Add Admin
           </Link>
         </Paragraph>
         <div className="py-10 relative w-90 max-w-lg lg:max-w-3xl lg:left-1/2 aspect-square lg:absolute"></div>

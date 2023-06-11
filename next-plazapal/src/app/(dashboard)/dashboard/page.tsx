@@ -28,7 +28,7 @@ const page = async () => {
           >
             Welcome, {user.user.name}, what would you like to manage today?
           </LargeHeading>
-          <div>
+          <div className="max-w-2xl">
             <Link
               className={buttonVariants({ variant: "outline" })}
               href="/shop"
@@ -49,9 +49,51 @@ const page = async () => {
             </Link>
             <Link
               className={buttonVariants({ variant: "outline" })}
+              href="/contractPayment"
+            >
+              Contract Payments
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
               href="/branch"
             >
               Branches
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/space"
+            >
+              Spaces
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/occupiedSpace"
+            >
+              Occupied Spaces
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/mallStaff"
+            >
+              Mall Staff
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/shopStaff"
+            >
+              Shop Staff
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/sensor"
+            >
+              Sensors
+            </Link>
+            <Link
+              className={buttonVariants({ variant: "outline" })}
+              href="/sensorData"
+            >
+              Sensor Data
             </Link>
             <Link
               className={buttonVariants({ variant: "outline" })}

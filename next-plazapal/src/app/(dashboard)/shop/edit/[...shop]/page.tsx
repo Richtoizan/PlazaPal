@@ -50,6 +50,8 @@ export default function Page() {
       id: "",
       name: "",
       surname: "",
+      email: "",
+      telephoneNo: "",
     },
   ]);
 

@@ -8,47 +8,55 @@ function replacer(key: any, value: any) {
   return value;
 }
 
-// /api/shopOwner
+// /api/mallStaff
 export default async function handle(req: any, res: any) {
   if (req.method === "GET") {
     const { id } = req.query;
 
     if (id) {
-      // Handle GET request for a specific shopOwner by ID
-      const shopOwner = await db.shopOwner.findUnique({
-        where: { ID: Number(id) },
+      // Handle GET request for a specific mallStaff by ID
+      const mallStaff = await db.mallStaff.findUnique({
+        where: {
+          ID: Number(id)
+        },
       });
 
-      if (shopOwner) {
+      if (mallStaff) {
         res.status(200).json({
-          name: shopOwner.Name,
-          surname: shopOwner.Surname,
-          email: shopOwner.Email,
-          telephoneNo: shopOwner.TelephoneNo,
+          name: mallStaff.Name,
+          surname: mallStaff.Surname,
+          email: mallStaff.Email,
+          telephoneNo: mallStaff.TelephoneNo,
+          startDate: mallStaff.StartDate,
+          salary: mallStaff.Salary,
+          assignedTo: mallStaff.AssignedTo,
         });
       } else {
         res.status(404).json({ message: "Not found" });
       }
     } else {
-      // Handle GET request for all shopOwners
-      const shopOwners = await db.shopOwner.findMany();
+      // Handle GET request for all mallStaffs
+      const mallStaffs = await db.mallStaff.findMany();
 
       res.status(200).json(
-        shopOwners.map((shopOwner) => ({
-          id: shopOwner.ID,
-          name: shopOwner.Name,
-          surname: shopOwner.Surname,
-          email: shopOwner.Email,
-          telephoneNo: shopOwner.TelephoneNo,
+        mallStaffs.map((mallStaff) => ({
+          id: mallStaff.ID,
+          name: mallStaff.Name,
+          surname: mallStaff.Surname,
+          email: mallStaff.Email,
+          telephoneNo: mallStaff.TelephoneNo,
+          startDate: mallStaff.StartDate,
+          salary: mallStaff.Salary,
+          assignedTo: mallStaff.AssignedTo,
         }))
       );
     }
   } else if (req.method === "POST") {
-    const { name, surname, email, telephoneNo, } = req.body;
+    const { name, surname, email, telephoneNo, startDate, salary, assignedTo } = req.body;
     const { id } = req.query;
 
     if (id) {
-      const result = await db.shopOwner.update({
+      const result = await db.mallStaff.update({
         where: {
           ID: Number(id),
         },
@@ -57,18 +65,24 @@ export default async function handle(req: any, res: any) {
           Surname: surname,
           Email: email,
           TelephoneNo: telephoneNo,
+          StartDate: startDate,
+          Salary: salary,
+          AssignedTo: assignedTo,
         },
       });
 
       const resultString = JSON.stringify(result, replacer);
       res.json(JSON.parse(resultString));
     } else {
-      const result = await db.shopOwner.create({
+      const result = await db.mallStaff.create({
         data: {
           Name: name,
           Surname: surname,
           Email: email,
           TelephoneNo: telephoneNo,
+          StartDate: startDate,
+          Salary: salary,
+          AssignedTo: assignedTo,
         },
       });
 
@@ -81,7 +95,7 @@ export default async function handle(req: any, res: any) {
     const { id } = req.query;
     if (id) {
       try {
-        const result = await db.shopOwner.delete({
+        const result = await db.mallStaff.delete({
           where: {
             ID: Number(id),
           },

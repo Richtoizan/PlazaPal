@@ -1,74 +1,77 @@
 import { db } from "@/lib/db";
-import { log } from "console";
 
 function replacer(key: any, value: any) {
   if (typeof value === "bigint") {
+    // Convert all BigInt values to strings
     return value.toString();
   }
   return value;
 }
 
-// /api/shopOwner
+// /api/occupiedSpace
 export default async function handle(req: any, res: any) {
   if (req.method === "GET") {
     const { id } = req.query;
 
     if (id) {
-      // Handle GET request for a specific shopOwner by ID
-      const shopOwner = await db.shopOwner.findUnique({
-        where: { ID: Number(id) },
+      // Handle GET request for a specific occupiedSpace by ID
+      const occupiedSpace = await db.occupiedSpace.findUnique({
+        where: {
+          SpaceID: Number(id),
+        },
       });
 
-      if (shopOwner) {
+      if (occupiedSpace) {
         res.status(200).json({
-          name: shopOwner.Name,
-          surname: shopOwner.Surname,
-          email: shopOwner.Email,
-          telephoneNo: shopOwner.TelephoneNo,
+          dateOpened: occupiedSpace.DateOpened,
+          openTime: occupiedSpace.OpenTime,
+          closeTime: occupiedSpace.CloseTime,
+          shopId: Number(occupiedSpace.ShopID),
         });
       } else {
         res.status(404).json({ message: "Not found" });
       }
     } else {
-      // Handle GET request for all shopOwners
-      const shopOwners = await db.shopOwner.findMany();
+      // Handle GET request for all occupiedSpaces
+      const occupiedSpaces = await db.occupiedSpace.findMany();
 
       res.status(200).json(
-        shopOwners.map((shopOwner) => ({
-          id: shopOwner.ID,
-          name: shopOwner.Name,
-          surname: shopOwner.Surname,
-          email: shopOwner.Email,
-          telephoneNo: shopOwner.TelephoneNo,
+        occupiedSpaces.map((occupiedSpace) => ({
+          spaceId: occupiedSpace.SpaceID,
+          dateOpened: occupiedSpace.DateOpened,
+          openTime: occupiedSpace.OpenTime,
+          closeTime: occupiedSpace.CloseTime,
+          shopId: Number(occupiedSpace.ShopID),
         }))
       );
     }
   } else if (req.method === "POST") {
-    const { name, surname, email, telephoneNo, } = req.body;
+    const { spaceId, dateOpened, openTime, closeTime, shopId } = req.body;
     const { id } = req.query;
 
     if (id) {
-      const result = await db.shopOwner.update({
+      const result = await db.occupiedSpace.update({
         where: {
-          ID: Number(id),
+          SpaceID: Number(id),
         },
         data: {
-          Name: name,
-          Surname: surname,
-          Email: email,
-          TelephoneNo: telephoneNo,
+          DateOpened: dateOpened,
+          OpenTime: openTime,
+          CloseTime: closeTime,
+          ShopID: Number(shopId),
         },
       });
 
       const resultString = JSON.stringify(result, replacer);
       res.json(JSON.parse(resultString));
     } else {
-      const result = await db.shopOwner.create({
+      const result = await db.occupiedSpace.create({
         data: {
-          Name: name,
-          Surname: surname,
-          Email: email,
-          TelephoneNo: telephoneNo,
+          SpaceID: spaceId,
+          DateOpened: dateOpened,
+          OpenTime: openTime,
+          CloseTime: closeTime,
+          ShopID: Number(shopId),
         },
       });
 
@@ -81,9 +84,9 @@ export default async function handle(req: any, res: any) {
     const { id } = req.query;
     if (id) {
       try {
-        const result = await db.shopOwner.delete({
+        const result = await db.occupiedSpace.delete({
           where: {
-            ID: Number(id),
+            SpaceID: Number(id),
           },
         });
 

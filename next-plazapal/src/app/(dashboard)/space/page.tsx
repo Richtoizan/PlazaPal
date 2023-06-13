@@ -18,21 +18,17 @@ export const metadata: Metadata = {
 
 const columns: GridColDef[] = [
   { field: "id", headerName: "ID", width: 130 },
-  { field: "name", headerName: "Name", width: 300 },
-  { field: "sector", headerName: "Sector", width: 300 },
-  { field: "ownedby", headerName: "Owned By", width: 300 },
+  { field: "location", headerName: "Location", width: 200 },
+  { field: "floor", headerName: "Floor", width: 200 },
+  { field: "branchID", headerName: "Branch ID", width: 150 },
+  { field: "area", headerName: "Area", width: 200 },
 ];
 
 const columnLinks = [
   {
     index: 0,
-    link: "shop",
+    link: "space",
     textField: "id",
-  },
-  {
-    index: 3,
-    link: "shopOwner",
-    textField: "ownerName",
   },
 ];
 
@@ -40,23 +36,14 @@ const page = async () => {
   const user = await getServerSession(authOptions);
   if (!user) return notFound();
 
-  const tuples = await db.shop.findMany({
-    include: {
-      ShopOwner: {
-        select: {
-          Name: true,
-          Surname: true,
-        },
-      },
-    },
-  });
+  const tuples = await db.space.findMany();
 
   const rows = tuples.map((t) => ({
     id: Number(t.ID),
-    name: t.Name,
-    sector: t.Sector,
-    ownedby: Number(t.OwnedBy),
-    ownerName: t.ShopOwner.Name + " " + t.ShopOwner.Surname,
+    location: t.Location,
+    floor: t.Floor,
+    branchID: Number(t.BranchID),
+    area: Number(t.AreaSquareMeter),
   }));
 
   return (

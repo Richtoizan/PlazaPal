@@ -1,24 +1,18 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useRouter, usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
-import React, { use, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import { ChangeEvent } from "react";
+import LargeHeading from "@/components/ui/LargeHeading";
 import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
-import { useTheme } from "next-themes";
-import LargeHeading from "@/components/ui/LargeHeading";
+import { Console } from "console";
 
 const useMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -33,31 +27,34 @@ const useMounted = () => {
 export default function Page() {
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
-  const [saveShop, setSaveShop] = useState({
-    name: "",
-    sector: "",
-    ownedBy: "",
+
+  const [saveSpace, setSaveSpace] = useState({
+    location: "",
+    floor: "",
+    branchID: "",
+    areaSquareMeter: "",
   });
 
   const router = useRouter();
 
   const pathname = usePathname();
   const pathNames = pathname ? pathname.split("/") : [];
-  const shopId = pathname ? pathNames[pathNames.length - 1] : null;
+  const spaceId = pathname ? pathNames[pathNames.length - 1] : null;
 
-  const [owners, setOwners] = useState([
+  const [branches, setBranches] = useState([
     {
       id: "",
-      name: "",
-      surname: "",
-      email: "",
-      telephoneNo: "",
+      location: "",
     },
   ]);
 
+  const [selectedBranchLocation, setSelectedBranchLocation] = useState("");
+  const [branchID, setBranchID] = useState("");
+
   useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
+    const fetchBranches = async () => {
+      // Fetch branches from API
+      const endpoint = "/api/branch";
       const options = {
         method: "GET",
         headers: {
@@ -68,11 +65,15 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setOwners(result);
-    };
+      const branchesWithUniqueIds = result.map((branch: any, index: any) => ({
+        ...branch,
+        id: String(index),
+      }));
 
-    const fetchShop = async () => {
-      const endpoint = "/api/shop?id=" + shopId;
+      setBranches(branchesWithUniqueIds);
+    };
+    const fetchSpace = async () => {
+      const endpoint = "/api/space?id=" + spaceId;
       const options = {
         method: "GET",
         headers: {
@@ -83,19 +84,20 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setSaveShop(result);
-    };
+      console.log(result);
 
-    fetchShop();
-    fetchOwners();
+      setSaveSpace(result);
+    };
+    fetchSpace();
+    fetchBranches();
   }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    const dataToSend = { ...saveSpace, branchID: Number(branchID) };
 
-    const endpoint = "/api/shop?id=" + shopId;
+    const endpoint = "/api/space?id=" + spaceId;
     const options = {
       method: "POST",
       headers: {
@@ -108,19 +110,29 @@ export default function Page() {
     const result = await response.json();
 
     if (result) {
+      router.push("/space/" + spaceId);
     }
-
-    router.push("/space/" + shopId);
   };
 
   const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveSpace({ ...saveSpace, [name]: value });
   };
 
   const handleSaveChangeSelect = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    const { value } = event.target;
+
+    // Find the branch that has the selected location
+    const selectedBranch = branches.find((branch) => branch.location === value);
+
+    console.log("Selected branch location:", value);
+    console.log("Selected branch:", selectedBranch);
+
+    // If a branch was found, use its ID. If not, default to an empty string.
+    const selectedBranchID = selectedBranch ? selectedBranch.id : "";
+
+    setSelectedBranchLocation(value);
+    setBranchID(selectedBranchID);
   };
 
   return (
@@ -136,41 +148,57 @@ export default function Page() {
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Edit the details of the shop</CardTitle>
+                <CardTitle>Edit the details of the space</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
                   <div className="grid w-full items-center gap-4">
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="location">Location</Label>
                       <Input
-                        name="name"
-                        id="name"
-                        value={saveShop.name}
+                        name="location"
+                        id="location"
+                        value={saveSpace.location}
                         onChange={handleSaveChange}
+                        placeholder="Location of the space"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
+                      <Label htmlFor="floor">Floor</Label>
                       <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
+                        name="floor"
+                        id="floor"
+                        value={saveSpace.floor}
                         onChange={handleSaveChange}
+                        placeholder="Floor of the space"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="ownedBy">Owner</Label>
+                      <Label htmlFor="areaSquareMeter">
+                        Area in Square Meters
+                      </Label>
+                      <Input
+                        name="areaSquareMeter"
+                        id="areaSquareMeter"
+                        value={saveSpace.areaSquareMeter}
+                        onChange={handleSaveChange}
+                        placeholder="Area of the space in square meters"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5 dark:text-white">
+                      <Label htmlFor="branchID" id="branchID-select-label">
+                        Branch
+                      </Label>
                       <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
+                        name="branchID"
+                        labelId="branchID-select-label"
+                        id="branchID-select"
+                        label="Branch"
+                        value={selectedBranchLocation}
                         onChange={handleSaveChangeSelect}
-                        className="border-white dark:text-white"
+                        className="border-gray-800 dark:text-white"
                         sx={{
-                          "& .MuiOutlinedInput-root.Mui-focused fieldset, & .MuiOutlinedInput-notchedOutline, &:hover .MuiOutlinedInput-notchedOutline, &.Mui-focused .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput":
+                          "& .MuiOutlinedInput-root.Mui-focused fieldset, & .MuiOutlinedInput-notchedOutline, &:hover .MuiOutlinedInput-notchedOutline, &.Mui-focused .MuiOutlinedInput-notchedOutline":
                             {
                               borderColor:
                                 resolvedTheme === "dark" ? "white" : "black",
@@ -180,9 +208,9 @@ export default function Page() {
                           },
                         }}
                       >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
+                        {branches.map((branch, index) => (
+                          <MenuItem key={index} value={branch.location}>
+                            {branch.location}
                           </MenuItem>
                         ))}
                       </Select>
@@ -192,7 +220,6 @@ export default function Page() {
                 </form>
               </CardContent>
             </Card>
-
             <Link
               className={buttonVariants({ variant: "outline" })}
               href="/space"

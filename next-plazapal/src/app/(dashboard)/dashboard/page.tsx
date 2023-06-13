@@ -28,7 +28,7 @@ const page = async () => {
           >
             Welcome, {user.user.name}, what would you like to manage today?
           </LargeHeading>
-          <div className="max-w-2xl">
+          <div className="max-w-2xl space-x-1 space-y-1">
             <Link
               className={buttonVariants({ variant: "outline" })}
               href="/shop"

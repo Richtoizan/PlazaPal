@@ -67,11 +67,11 @@ export default async function handle(req: any, res: any) {
     } else {
       const result = await db.occupiedSpace.create({
         data: {
-          SpaceID: spaceId,
-          DateOpened: dateOpened,
-          OpenTime: openTime,
-          CloseTime: closeTime,
-          ShopID: Number(shopId),
+          SpaceID: BigInt(spaceId),
+          DateOpened: new Date(dateOpened),
+          OpenTime: new Date(openTime),
+          CloseTime: new Date(closeTime),
+          ShopID: BigInt(shopId),
         },
       });
 

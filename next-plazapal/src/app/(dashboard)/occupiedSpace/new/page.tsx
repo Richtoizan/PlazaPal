@@ -1,10 +1,8 @@
 "use client";
 
-import { redirect } from "next/navigation";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -12,6 +10,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
+import { redirect } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ChangeEvent } from "react";
@@ -20,6 +19,7 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
 import { useTheme } from "next-themes";
 import LargeHeading from "@/components/ui/LargeHeading";
+import TextField from "@mui/material/TextField";
 
 const useMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -34,50 +34,28 @@ const useMounted = () => {
 export default function Page() {
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
-
-  const [saveShop, setSaveShop] = useState({
-    name: "",
-    sector: "",
-    ownedBy: "",
-  });
-
   const router = useRouter();
 
-  const [owners, setOwners] = useState([
-    {
-      id: "",
-      name: "",
-      surname: "",
-      email: "",
-      telephoneNo: "",
-    },
-  ]);
-
-  useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      const response = await fetch(endpoint, options);
-      const result = await response.json();
-
-      setOwners(result);
-    };
-
-    fetchOwners();
-  }, []);
+  const [occupiedSpace, setOccupiedSpace] = useState({
+    spaceId: "",
+    dateOpened: new Date(),
+    openTime: new Date(),
+    closeTime: new Date(),
+    shopId: "",
+  });
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    const dataToSend = {
+      spaceId: Number(occupiedSpace.spaceId), // ensure this is included
+      shopId: Number(occupiedSpace.shopId),
+      dateOpened: new Date(occupiedSpace.dateOpened),
+      openTime: new Date(occupiedSpace.openTime),
+      closeTime: new Date(occupiedSpace.closeTime),
+    };
 
-    console.log("Data to send:", dataToSend);
+    console.log(dataToSend);
 
     const endpoint = "/api/occupiedSpace";
     const options = {
@@ -92,19 +70,13 @@ export default function Page() {
     const result = await response.json();
 
     if (result) {
+      router.push("/occupiedSpace");
     }
-
-    router.push("/occupiedSpace");
   };
 
-  const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleOccupiedSpaceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
-  };
-
-  const handleSaveChangeSelect = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setOccupiedSpace({ ...occupiedSpace, [name]: value });
   };
 
   return (
@@ -120,61 +92,70 @@ export default function Page() {
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Enter the details of the new shop</CardTitle>
+                <CardTitle>
+                  Enter the details of the new occupied space
+                </CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
                   <div className="grid w-full items-center gap-4">
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="spaceId">Space ID</Label>
                       <Input
-                        name="name"
-                        id="name"
-                        value={saveShop.name}
-                        onChange={handleSaveChange}
-                        placeholder="Name of the shop"
+                        name="spaceId"
+                        id="spaceId"
+                        value={occupiedSpace.spaceId}
+                        onChange={handleOccupiedSpaceChange}
+                        placeholder="Space ID"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
-                      <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
-                        onChange={handleSaveChange}
-                        placeholder="Sector of the shop"
+                      <Label htmlFor="dateOpened">Date Opened</Label>
+                      <TextField
+                        id="dateOpened"
+                        type="date"
+                        defaultValue={occupiedSpace.dateOpened}
+                        onChange={handleOccupiedSpaceChange}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
                       />
                     </div>
-                    <div className="flex flex-col space-y-1.5 dark:text-white">
-                      <Label htmlFor="ownedBy" id="ownedBy-select-label">
-                        Owner
-                      </Label>
-                      <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
-                        onChange={handleSaveChangeSelect}
-                        className="border-gray-800 dark:text-white"
-                        sx={{
-                          "& .MuiOutlinedInput-root.Mui-focused fieldset, & .MuiOutlinedInput-notchedOutline, &:hover .MuiOutlinedInput-notchedOutline, &.Mui-focused .MuiOutlinedInput-notchedOutline":
-                            {
-                              borderColor:
-                                resolvedTheme === "dark" ? "white" : "black",
-                            },
-                          "& .MuiSelect-icon": {
-                            color: resolvedTheme === "dark" ? "white" : "black",
-                          },
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="openTime">Open Time</Label>
+                      <TextField
+                        id="openTime"
+                        type="time"
+                        defaultValue={occupiedSpace.openTime}
+                        onChange={handleOccupiedSpaceChange}
+                        InputLabelProps={{
+                          shrink: true,
                         }}
-                      >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
-                          </MenuItem>
-                        ))}
-                      </Select>
+                      />
                     </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="closeTime">Close Time</Label>
+                      <TextField
+                        id="closeTime"
+                        type="time"
+                        defaultValue={occupiedSpace.closeTime}
+                        onChange={handleOccupiedSpaceChange}
+                        InputLabelProps={{
+                          shrink: true,
+                        }}
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="shopId">Shop ID</Label>
+                      <Input
+                        name="shopId"
+                        id="shopId"
+                        value={occupiedSpace.shopId}
+                        onChange={handleOccupiedSpaceChange}
+                        placeholder="Shop ID"
+                      />
+                    </div>
+
                     <Button type="submit">Submit</Button>
                   </div>
                 </form>

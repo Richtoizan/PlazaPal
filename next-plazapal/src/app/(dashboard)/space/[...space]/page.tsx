@@ -1,28 +1,25 @@
 import LargeHeading from "@/components/ui/LargeHeading";
-import Paragraph from "@/components/ui/Paragraph";
 import { db } from "@/lib/db";
-import { Space } from "@prisma/client";
 import { notFound } from "next/navigation";
-import params from "next/router";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
 
-const SpacePage = async ({ params }: { params: { shop: string } }) => {
-  const shop = await db.shop.findUnique({
+const SpacePage = async ({ params }: { params: { space: string } }) => {
+  const space = await db.space.findUnique({
     where: {
-      ID: Number(params.shop),
+      ID: Number(params.space),
     },
   });
 
-  if (!shop) return notFound();
+  if (!space) return notFound();
   else {
-    const owner = await db.shopOwner.findUnique({
+    const branch = await db.branch.findUnique({
       where: {
-        ID: shop.OwnedBy,
+        ID: space.BranchID,
       },
     });
 
-    const ownedBy = owner ? owner.Name + " " + owner.Surname : shop.OwnedBy;
+    const branchLocation = branch ? branch.Location : space.BranchID;
 
     return (
       <div className="relative flex items-center justify-center overflow-x-hidden min-h-screen">
@@ -30,11 +27,13 @@ const SpacePage = async ({ params }: { params: { shop: string } }) => {
           <div className="gap-6 flex flex-col justify-center lg:justify-center items-center lg:items-start">
             <LargeHeading
               size="lg"
-              className="three-d text-black dark:text-light-gold max-w-2xl"
+              className="three-d text-black dark:text-light-gold max-w-5xl"
             >
-              <p>{shop.Name}</p>
-              <p>Sector: {shop.Sector}</p>
-              <p>Owned By: {ownedBy.toString()}</p>
+              <p>ID: {Number(space.ID)}</p>
+              <p>Location: {space.Location}</p>
+              <p>Floor: {space.Floor}</p>
+              <p>Branch : {Number(space.BranchID)}</p>
+              <p>Area in Square Meters: {space.AreaSquareMeter}</p>
             </LargeHeading>
             <Link
               className={buttonVariants({ variant: "outline" })}

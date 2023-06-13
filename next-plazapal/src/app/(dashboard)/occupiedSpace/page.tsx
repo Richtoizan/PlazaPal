@@ -1,8 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import { db } from "@/lib/db";
-import { ShopOwner } from "@prisma/client";
-import { buttonVariants } from "@/components/ui/Button";
 
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
@@ -10,6 +8,7 @@ import Table from "@/components/ui/Table";
 import Paragraph from "@/components/ui/Paragraph";
 import { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
+import { buttonVariants } from "@/components/ui/Button";
 
 export const metadata: Metadata = {
   title: "PlazaPal | Dashboard",
@@ -17,22 +16,33 @@ export const metadata: Metadata = {
 };
 
 const columns: GridColDef[] = [
-  { field: "id", headerName: "ID", width: 130 },
-  { field: "name", headerName: "Name", width: 300 },
-  { field: "sector", headerName: "Sector", width: 300 },
-  { field: "ownedby", headerName: "Owned By", width: 300 },
+  { field: "id", headerName: "Space ID", width: 130 },
+  { field: "dateOpened", headerName: "Date Opened", width: 200 },
+  { field: "openTime", headerName: "Open Time", width: 200 },
+  { field: "closeTime", headerName: "Close Time", width: 200 },
+  { field: "shopID", headerName: "Shop ID", width: 130 },
 ];
+
+const formatDate = (date: any) => {
+  const d = new Date(date);
+  const hours = d.getHours();
+  const minutes = d.getMinutes();
+
+  return `${hours.toString().padStart(2, "0")}:${minutes
+    .toString()
+    .padStart(2, "0")}`;
+};
 
 const columnLinks = [
   {
     index: 0,
-    link: "shop",
+    link: "occupiedSpace",
     textField: "id",
   },
   {
-    index: 3,
-    link: "shopOwner",
-    textField: "ownerName",
+    index: 4,
+    link: "shop",
+    textField: "shopID",
   },
 ];
 
@@ -40,23 +50,27 @@ const page = async () => {
   const user = await getServerSession(authOptions);
   if (!user) return notFound();
 
-  const tuples = await db.shop.findMany({
+  const tuples = await db.occupiedSpace.findMany({
     include: {
-      ShopOwner: {
+      Shop: {
         select: {
-          Name: true,
-          Surname: true,
+          ID: true,
+        },
+      },
+      Space: {
+        select: {
+          ID: true,
         },
       },
     },
   });
 
   const rows = tuples.map((t) => ({
-    id: Number(t.ID),
-    name: t.Name,
-    sector: t.Sector,
-    ownedby: Number(t.OwnedBy),
-    ownerName: t.ShopOwner.Name + " " + t.ShopOwner.Surname,
+    id: Number(t.SpaceID),
+    dateOpened: t.DateOpened,
+    openTime: formatDate(t.OpenTime),
+    closeTime: formatDate(t.CloseTime),
+    shopID: Number(t.ShopID),
   }));
 
   return (

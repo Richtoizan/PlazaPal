@@ -1,24 +1,17 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useRouter, usePathname } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
-import React, { use, useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useTheme } from "next-themes";
 import { ChangeEvent } from "react";
-import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
+import LargeHeading from "@/components/ui/LargeHeading";
+import TextField from "@mui/material/TextField";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
-import { useTheme } from "next-themes";
-import LargeHeading from "@/components/ui/LargeHeading";
 
 const useMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -33,31 +26,24 @@ const useMounted = () => {
 export default function Page() {
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
-  const [saveShop, setSaveShop] = useState({
-    name: "",
-    sector: "",
-    ownedBy: "",
+
+  const [occupiedSpace, setOccupiedSpace] = useState({
+    spaceId: "",
+    dateOpened: new Date(),
+    openTime: new Date(),
+    closeTime: new Date(),
+    shopId: "",
   });
 
   const router = useRouter();
 
   const pathname = usePathname();
   const pathNames = pathname ? pathname.split("/") : [];
-  const shopId = pathname ? pathNames[pathNames.length - 1] : null;
-
-  const [owners, setOwners] = useState([
-    {
-      id: "",
-      name: "",
-      surname: "",
-      email: "",
-      telephoneNo: "",
-    },
-  ]);
+  const spaceId = pathname ? pathNames[pathNames.length - 1] : null;
 
   useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
+    const fetchOccupiedSpace = async () => {
+      const endpoint = "/api/occupiedSpace?id=" + spaceId;
       const options = {
         method: "GET",
         headers: {
@@ -68,34 +54,23 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setOwners(result);
+      setOccupiedSpace(result);
     };
-
-    const fetchShop = async () => {
-      const endpoint = "/api/occupiedSpace?id=" + shopId;
-      const options = {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
-
-      const response = await fetch(endpoint, options);
-      const result = await response.json();
-
-      setSaveShop(result);
-    };
-
-    fetchShop();
-    fetchOwners();
+    fetchOccupiedSpace();
   }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    const dataToSend = {
+      spaceId: Number(occupiedSpace.spaceId),
+      shopId: Number(occupiedSpace.shopId),
+      dateOpened: new Date(occupiedSpace.dateOpened),
+      openTime: new Date(occupiedSpace.openTime),
+      closeTime: new Date(occupiedSpace.closeTime),
+    };
 
-    const endpoint = "/api/occupiedSpace?id=" + shopId;
+    const endpoint = "/api/occupiedSpace?id=" + spaceId;
     const options = {
       method: "POST",
       headers: {
@@ -108,19 +83,13 @@ export default function Page() {
     const result = await response.json();
 
     if (result) {
+      router.push("/occupiedSpace/" + spaceId);
     }
-
-    router.push("/occupiedSpace/" + shopId);
   };
 
-  const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
+  const handleOccupiedSpaceChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
-  };
-
-  const handleSaveChangeSelect = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setOccupiedSpace({ ...occupiedSpace, [name]: value });
   };
 
   return (
@@ -136,69 +105,90 @@ export default function Page() {
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Edit the details of the shop</CardTitle>
+                <CardTitle>Edit the details of the occupied space</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
-                  <div className="grid w-full items-center gap-4">
-                    <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="name">Name</Label>
-                      <Input
-                        name="name"
-                        id="name"
-                        value={saveShop.name}
-                        onChange={handleSaveChange}
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
-                      <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
-                        onChange={handleSaveChange}
-                      />
-                    </div>
-                    <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="ownedBy">Owner</Label>
-                      <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
-                        onChange={handleSaveChangeSelect}
-                        className="border-white dark:text-white"
-                        sx={{
-                          "& .MuiOutlinedInput-root.Mui-focused fieldset, & .MuiOutlinedInput-notchedOutline, &:hover .MuiOutlinedInput-notchedOutline, &.Mui-focused .MuiOutlinedInput-notchedOutline, & .MuiOutlinedInput":
-                            {
-                              borderColor:
-                                resolvedTheme === "dark" ? "white" : "black",
-                            },
-                          "& .MuiSelect-icon": {
-                            color: resolvedTheme === "dark" ? "white" : "black",
-                          },
-                        }}
+                  <div className="my-4">
+                    <Label htmlFor="spaceId">Space ID</Label>
+                    <Input
+                      id="spaceId"
+                      name="spaceId"
+                      type="number"
+                      value={occupiedSpace.spaceId}
+                      onChange={handleOccupiedSpaceChange}
+                      required
+                    />
+                  </div>
+                  <div className="my-4">
+                    <Label htmlFor="shopId">Shop ID</Label>
+                    <Input
+                      id="shopId"
+                      name="shopId"
+                      type="number"
+                      value={occupiedSpace.shopId}
+                      onChange={handleOccupiedSpaceChange}
+                      required
+                    />
+                  </div>
+                  <div className="my-4">
+                    <Label htmlFor="dateOpened">Date Opened</Label>
+                    <TextField
+                      id="dateOpened"
+                      name="dateOpened"
+                      type="date"
+                      value={occupiedSpace.dateOpened}
+                      onChange={handleOccupiedSpaceChange}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </div>
+                  <div className="my-4">
+                    <Label htmlFor="openTime">Open Time</Label>
+                    <TextField
+                      id="openTime"
+                      name="openTime"
+                      type="time"
+                      value={occupiedSpace.openTime}
+                      onChange={handleOccupiedSpaceChange}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </div>
+                  <div className="my-4">
+                    <Label htmlFor="closeTime">Close Time</Label>
+                    <TextField
+                      id="closeTime"
+                      name="closeTime"
+                      type="time"
+                      value={occupiedSpace.closeTime}
+                      onChange={handleOccupiedSpaceChange}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </div>
+                  <div className="flex justify-center items-center mt-6">
+                    <Button
+                      color={resolvedTheme === "dark" ? "light" : "dark"}
+                      type="submit"
+                    >
+                      Save Changes
+                    </Button>
+                    <Link href="/occupiedSpace">
+                      <Button
+                        color={resolvedTheme === "dark" ? "light" : "dark"}
+                        className="ml-4"
                       >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </div>
-                    <Button type="submit">Submit</Button>
+                        Cancel
+                      </Button>
+                    </Link>
                   </div>
                 </form>
               </CardContent>
             </Card>
-
-            <Link
-              className={buttonVariants({ variant: "outline" })}
-              href="/occupiedSpace"
-            >
-              Back to occupied spaces
-            </Link>
           </div>
         </div>
       </div>

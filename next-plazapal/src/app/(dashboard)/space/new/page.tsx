@@ -1,25 +1,18 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { useRouter } from "next/navigation";
+import React, { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/Button";
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import { ChangeEvent } from "react";
+import LargeHeading from "@/components/ui/LargeHeading";
 import { MenuItem, Select, SelectChangeEvent } from "@mui/material";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/Button";
-import { useTheme } from "next-themes";
-import LargeHeading from "@/components/ui/LargeHeading";
+import { Console } from "console";
 
 const useMounted = () => {
   const [isMounted, setIsMounted] = useState(false);
@@ -35,27 +28,29 @@ export default function Page() {
   const { resolvedTheme } = useTheme();
   const isMounted = useMounted();
 
-  const [saveShop, setSaveShop] = useState({
-    name: "",
-    sector: "",
-    ownedBy: "",
+  const [saveSpace, setSaveSpace] = useState({
+    location: "",
+    floor: "",
+    branchID: "",
+    areaSquareMeter: "",
   });
 
   const router = useRouter();
 
-  const [owners, setOwners] = useState([
+  const [branches, setBranches] = useState([
     {
       id: "",
-      name: "",
-      surname: "",
-      email: "",
-      telephoneNo: "",
+      location: "",
     },
   ]);
 
+  const [selectedBranchLocation, setSelectedBranchLocation] = useState("");
+  const [branchID, setBranchID] = useState("");
+
   useEffect(() => {
-    const fetchOwners = async () => {
-      const endpoint = "/api/shopOwner";
+    const fetchBranches = async () => {
+      // Fetch branches from API
+      const endpoint = "/api/branch";
       const options = {
         method: "GET",
         headers: {
@@ -66,20 +61,26 @@ export default function Page() {
       const response = await fetch(endpoint, options);
       const result = await response.json();
 
-      setOwners(result);
+      const branchesWithUniqueIds = result.map((branch: any, index: any) => ({
+        ...branch,
+        id: String(index),
+      }));
+
+      setBranches(branchesWithUniqueIds);
     };
 
-    fetchOwners();
+    fetchBranches();
+    console.log(branches);
   }, []);
 
   const handleSubmit = async (event: any) => {
     event.preventDefault();
 
-    const dataToSend = { ...saveShop, ownedBy: Number(saveShop.ownedBy) };
+    console.log("Branch ID:", Number(branchID));
 
-    console.log("Data to send:", dataToSend);
+    const dataToSend = { ...saveSpace, branchID: Number(branchID) };
 
-    const endpoint = "/api/shop";
+    const endpoint = "/api/space";
     const options = {
       method: "POST",
       headers: {
@@ -92,19 +93,29 @@ export default function Page() {
     const result = await response.json();
 
     if (result) {
+      router.push("/space");
     }
-
-    router.push("/space");
   };
 
   const handleSaveChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    setSaveSpace({ ...saveSpace, [name]: value });
   };
 
   const handleSaveChangeSelect = (event: SelectChangeEvent) => {
-    const { name, value } = event.target;
-    setSaveShop({ ...saveShop, [name]: value });
+    const { value } = event.target;
+
+    // Find the branch that has the selected location
+    const selectedBranch = branches.find((branch) => branch.location === value);
+
+    console.log("Selected branch location:", value);
+    console.log("Selected branch:", selectedBranch);
+
+    // If a branch was found, use its ID. If not, default to an empty string.
+    const selectedBranchID = selectedBranch ? selectedBranch.id : "";
+
+    setSelectedBranchLocation(value);
+    setBranchID(selectedBranchID);
   };
 
   return (
@@ -120,41 +131,53 @@ export default function Page() {
             </LargeHeading>
             <Card className="border-black dark:border-white">
               <CardHeader>
-                <CardTitle>Enter the details of the new shop</CardTitle>
+                <CardTitle>Enter the details of the new space</CardTitle>
               </CardHeader>
               <CardContent>
                 <form onSubmit={handleSubmit}>
                   <div className="grid w-full items-center gap-4">
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="name">Name</Label>
+                      <Label htmlFor="location">Location</Label>
                       <Input
-                        name="name"
-                        id="name"
-                        value={saveShop.name}
+                        name="location"
+                        id="location"
+                        value={saveSpace.location}
                         onChange={handleSaveChange}
-                        placeholder="Name of the shop"
+                        placeholder="Location of the space"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5">
-                      <Label htmlFor="sector">Sector</Label>
+                      <Label htmlFor="floor">Floor</Label>
                       <Input
-                        name="sector"
-                        id="sector"
-                        value={saveShop.sector}
+                        name="floor"
+                        id="floor"
+                        value={saveSpace.floor}
                         onChange={handleSaveChange}
-                        placeholder="Sector of the shop"
+                        placeholder="Floor of the space"
+                      />
+                    </div>
+                    <div className="flex flex-col space-y-1.5">
+                      <Label htmlFor="areaSquareMeter">
+                        Area in Square Meters
+                      </Label>
+                      <Input
+                        name="areaSquareMeter"
+                        id="areaSquareMeter"
+                        value={saveSpace.areaSquareMeter}
+                        onChange={handleSaveChange}
+                        placeholder="Area of the space in square meters"
                       />
                     </div>
                     <div className="flex flex-col space-y-1.5 dark:text-white">
-                      <Label htmlFor="ownedBy" id="ownedBy-select-label">
-                        Owner
+                      <Label htmlFor="branchID" id="branchID-select-label">
+                        Branch
                       </Label>
                       <Select
-                        name="ownedBy"
-                        labelId="ownedBy-select-label"
-                        id="ownedBy-select"
-                        value={saveShop.ownedBy}
-                        label="Owner"
+                        name="branchID"
+                        labelId="branchID-select-label"
+                        id="branchID-select"
+                        label="Branch"
+                        value={selectedBranchLocation}
                         onChange={handleSaveChangeSelect}
                         className="border-gray-800 dark:text-white"
                         sx={{
@@ -168,9 +191,9 @@ export default function Page() {
                           },
                         }}
                       >
-                        {owners.map((owner) => (
-                          <MenuItem key={owner.id} value={owner.id}>
-                            {owner.name} {owner.surname}
+                        {branches.map((branch, index) => (
+                          <MenuItem key={index} value={branch.location}>
+                            {branch.location}
                           </MenuItem>
                         ))}
                       </Select>

@@ -46,10 +46,11 @@ export default async function handle(req: any, res: any) {
       );
     }
   } else if (req.method === "POST") {
-    const { location, floor, branchId, areaSquareMeter } = req.body;
+    const { location, floor, branchID, areaSquareMeter } = req.body;
     const { id } = req.query;
 
     if (id) {
+      console.log("id", id);
       const result = await db.space.update({
         where: {
           ID: Number(id),
@@ -57,7 +58,7 @@ export default async function handle(req: any, res: any) {
         data: {
           Location: location,
           Floor: floor,
-          BranchID: Number(branchId),
+          BranchID: Number(branchID) + 1,
           AreaSquareMeter: Number(areaSquareMeter),
         },
       });
@@ -69,7 +70,7 @@ export default async function handle(req: any, res: any) {
         data: {
           Location: location,
           Floor: floor,
-          BranchID: Number(branchId),
+          BranchID: Number(branchID),
           AreaSquareMeter: Number(areaSquareMeter),
         },
       });

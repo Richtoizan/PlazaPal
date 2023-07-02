@@ -10,8 +10,6 @@
 
 ![image](https://github.com/Richtoizan/next-plazapal/assets/67191959/3a1e5dca-4e67-4246-89ed-44e45fdcb1b2)
 
-![image](https://github.com/Richtoizan/next-plazapal/assets/67191959/b7b500c6-41e4-407c-8649-33b9a451a4bf)
-
 ![image](https://github.com/Richtoizan/next-plazapal/assets/67191959/0a596c0c-824f-4261-88b9-d661f526a35d)
 
 ![image](https://github.com/Richtoizan/next-plazapal/assets/67191959/293b638a-dd4c-4473-9cef-679838ae7dc9)
